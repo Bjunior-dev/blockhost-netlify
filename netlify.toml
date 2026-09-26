@@ -1,0 +1,11 @@
+[build]
+  publish = "public"
+  functions = "netlify/functions"
+
+# Semua request ke /api/* diteruskan ke satu Netlify Function (Express di dalamnya
+# yang menangani routing /orders, /payments, /servers).
+[[redirects]]
+  from = "/api/*"
+  to = "/.netlify/functions/api/:splat"
+  status = 200
+  force = true

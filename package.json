@@ -1,0 +1,20 @@
+{
+  "name": "blockhost-netlify",
+  "version": "1.0.0",
+  "description": "BlockHost di Netlify: frontend statis + Netlify Functions (Express dibungkus serverless-http) + database Turso (libSQL)",
+  "private": true,
+  "scripts": {
+    "dev": "netlify dev"
+  },
+  "dependencies": {
+    "@libsql/client": "^0.14.0",
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.5",
+    "express": "^4.19.2",
+    "midtrans-client": "^1.4.2",
+    "serverless-http": "^3.2.0"
+  },
+  "devDependencies": {
+    "netlify-cli": "^17.38.0"
+  }
+}

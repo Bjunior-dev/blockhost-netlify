@@ -1,0 +1,465 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>BlockHost - Hosting Minecraft</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Nunito:wght@400;700;800&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#eef7ea; --bg2:#ffffff; --text:#20301f; --muted:#5a6b57;
+  --green:#4c8c2b; --green-dark:#2f5c1a; --card:#ffffff; --border:#c9dcbf; --accent:#ffcc4d;
+  --danger:#c14b3a; --mono:#0e140c; --mono-text:#7fe08a;
+  box-sizing:border-box; padding-top:env(safe-area-inset-top,0px); padding-bottom:env(safe-area-inset-bottom,0px);
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){ --bg:#141b12; --bg2:#1b241a; --text:#e7f2e3; --muted:#a3b39d; --green:#63b23a; --green-dark:#3d7a24; --card:#1f2a1d; --border:#2e3d2a; --accent:#ffd35c; }
+}
+:root[data-theme="dark"]{ --bg:#141b12; --bg2:#1b241a; --text:#e7f2e3; --muted:#a3b39d; --green:#63b23a; --green-dark:#3d7a24; --card:#1f2a1d; --border:#2e3d2a; --accent:#ffd35c; }
+*{box-sizing:border-box;}
+html{scroll-padding-top:env(safe-area-inset-top,0px); scroll-behavior:smooth;}
+html,body{height:100%;}
+body{margin:0; background:var(--bg); color:var(--text); font-family:'Nunito',sans-serif; line-height:1.5;}
+.pixel{font-family:'Press Start 2P',monospace;}
+header{position:sticky; top:0; padding-top:env(safe-area-inset-top,0px); background:var(--bg2); border-bottom:4px solid var(--green-dark); z-index:20;}
+.nav{max-width:1100px; margin:0 auto; display:flex; align-items:center; justify-content:space-between; padding:14px 20px; flex-wrap:wrap; gap:10px;}
+.logo{display:flex; align-items:center; gap:10px; font-size:0.8rem;}
+.logo-block{width:26px; height:26px; background:linear-gradient(160deg,var(--green),var(--green-dark)); border:2px solid var(--green-dark); box-shadow:inset -4px -4px 0 rgba(0,0,0,.25);}
+nav a{color:var(--text); text-decoration:none; margin-left:18px; font-weight:700; font-size:.92rem;}
+.cta-btn,.plan-btn,.ghost-btn{position:relative; overflow:hidden; cursor:pointer; font-weight:800;}
+.cta-btn{background:var(--accent); color:#3a2a08; border:3px solid #b5860a; padding:10px 16px; box-shadow:0 4px 0 #8a670a;}
+.cta-btn:active{transform:translateY(3px); box-shadow:none;}
+#themeToggle{background:none; border:2px solid var(--border); color:var(--text); padding:6px 10px; border-radius:6px; cursor:pointer;}
+.hero{max-width:1100px; margin:0 auto; padding:56px 20px 30px; text-align:center; position:relative; overflow:hidden;}
+.hero h1{font-size:1.3rem; line-height:1.9; margin-bottom:16px;}
+.hero h1 span{color:var(--green);}
+.hero p{color:var(--muted); font-size:1.05rem; max-width:600px; margin:0 auto 26px;}
+.float-block{position:absolute; width:24px; height:24px; opacity:.5; border:2px solid rgba(0,0,0,.25); box-shadow:inset -4px -4px 0 rgba(0,0,0,.2); pointer-events:none;}
+.stats{display:flex; justify-content:center; gap:36px; flex-wrap:wrap; margin-top:10px;}
+.stat{text-align:center;}
+.counter{font-size:1.7rem; font-weight:800; color:var(--green-dark);}
+:root[data-theme="dark"] .counter{color:var(--green);}
+.stat .label{display:block; color:var(--muted); font-size:.82rem; margin-top:2px;}
+section{max-width:1100px; margin:0 auto; padding:46px 20px;}
+h2.pixel{font-size:.95rem; text-align:center; margin-bottom:32px; color:var(--green-dark);}
+:root[data-theme="dark"] h2.pixel{color:var(--green);}
+.reveal{opacity:0; transform:translateY(22px); transition:opacity .5s ease,transform .5s ease;}
+.reveal.in{opacity:1; transform:translateY(0);}
+.grid{display:grid; grid-template-columns:repeat(auto-fit,minmax(220px,1fr)); gap:18px;}
+.card{background:var(--card); border:2px solid var(--border); border-radius:8px; padding:20px; transition:transform .2s,box-shadow .2s;}
+.card:hover{transform:translateY(-5px); box-shadow:0 10px 18px rgba(0,0,0,.12);}
+.card .icon{width:34px; height:34px; margin-bottom:10px; background:var(--green); border:2px solid var(--green-dark);}
+.pricing{display:grid; grid-template-columns:repeat(auto-fit,minmax(230px,1fr)); gap:20px;}
+.plan{background:var(--card); border:3px solid var(--border); border-radius:10px; padding:24px; text-align:center; position:relative; transition:transform .2s;}
+.plan:hover{transform:translateY(-8px);}
+.plan.popular{border-color:var(--accent);}
+.badge{position:absolute; top:-13px; left:50%; transform:translateX(-50%); background:var(--accent); color:#3a2a08; padding:4px 12px; font-size:.72rem; font-weight:800; border-radius:6px;}
+.price{font-size:1.7rem; font-weight:800; color:var(--green-dark); margin:8px 0;}
+:root[data-theme="dark"] .price{color:var(--green);}
+.plan ul{list-style:none; padding:0; margin:14px 0; color:var(--muted); font-size:.88rem; text-align:left;}
+.plan li{padding:5px 0; border-bottom:1px dashed var(--border);}
+.plan-btn{width:100%; background:var(--green); color:#fff; border:none; padding:11px; border-radius:6px; box-shadow:0 4px 0 var(--green-dark);}
+.plan-btn:active{transform:translateY(3px); box-shadow:none;}
+.ripple{position:absolute; border-radius:50%; background:rgba(255,255,255,.55); transform:scale(0); animation:rip .55s linear; pointer-events:none;}
+@keyframes rip{to{transform:scale(3); opacity:0;}}
+
+/* Modal */
+.overlay{position:fixed; inset:0; background:rgba(10,15,8,.6); display:none; align-items:center; justify-content:center; z-index:50; padding:16px;}
+.overlay.show{display:flex;}
+.modal{background:var(--bg2); border:3px solid var(--border); border-radius:10px; max-width:420px; width:100%; padding:24px; max-height:90vh; overflow-y:auto;}
+.modal h3{margin-top:0; font-size:1.1rem;}
+.modal label{display:block; font-size:.85rem; font-weight:700; margin:12px 0 4px;}
+.modal input,.modal select{width:100%; padding:10px; border-radius:6px; border:2px solid var(--border); background:var(--bg); color:var(--text); font-family:inherit;}
+.pay-methods{display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-top:6px;}
+.pay-methods label{display:flex; align-items:center; gap:6px; border:2px solid var(--border); border-radius:6px; padding:8px; font-weight:700; font-size:.82rem; cursor:pointer;}
+.pay-methods input{width:auto;}
+.pay-methods label.active{border-color:var(--green); background:rgba(76,140,43,.1);}
+.order-summary{background:var(--bg); border:2px dashed var(--border); border-radius:8px; padding:12px; font-size:.9rem; margin:10px 0;}
+.modal-actions{display:flex; gap:10px; margin-top:18px;}
+.ghost-btn{background:none; border:2px solid var(--border); color:var(--text); padding:10px 16px; border-radius:6px; flex:1;}
+.pay-btn{flex:2; background:var(--green); color:#fff; border:none; padding:11px; border-radius:6px; box-shadow:0 4px 0 var(--green-dark);}
+.pay-btn:disabled{opacity:.6; cursor:progress;}
+.spinner{width:16px; height:16px; border:3px solid rgba(255,255,255,.4); border-top-color:#fff; border-radius:50%; display:inline-block; animation:spin .7s linear infinite; vertical-align:-3px; margin-right:6px;}
+@keyframes spin{to{transform:rotate(360deg);}}
+.pay-success{text-align:center; padding:10px 0;}
+.pay-success .check{font-size:2.4rem;}
+
+/* Panel */
+#panel .empty{text-align:center; color:var(--muted); padding:30px 10px; border:2px dashed var(--border); border-radius:10px;}
+.server-card{background:var(--card); border:2px solid var(--border); border-radius:10px; padding:18px; margin-bottom:18px;}
+.server-head{display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px;}
+.server-head h3{margin:0; font-size:1rem;}
+.status-pill{font-size:.75rem; font-weight:800; padding:4px 10px; border-radius:20px;}
+.status-pill.online{background:rgba(76,140,43,.18); color:var(--green-dark);}
+:root[data-theme="dark"] .status-pill.online{color:var(--green);}
+.status-pill.offline{background:rgba(193,75,58,.15); color:var(--danger);}
+.server-actions{display:flex; gap:8px; margin:12px 0; flex-wrap:wrap;}
+.small-btn{border:2px solid var(--border); background:var(--bg); color:var(--text); padding:7px 12px; border-radius:6px; font-weight:700; font-size:.82rem; cursor:pointer;}
+.small-btn.danger{border-color:var(--danger); color:var(--danger);}
+.small-btn.primary{border-color:var(--green); color:var(--green-dark);}
+:root[data-theme="dark"] .small-btn.primary{color:var(--green);}
+.meter{background:var(--bg); border-radius:6px; height:10px; overflow:hidden; border:1px solid var(--border); margin-top:4px;}
+.meter-fill{height:100%; background:var(--green); transition:width .6s ease;}
+.meter-row{font-size:.78rem; color:var(--muted); margin-top:10px;}
+.console{background:var(--mono); color:var(--mono-text); font-family:monospace; font-size:.78rem; border-radius:8px; padding:12px; height:130px; overflow-y:auto; margin-top:12px;}
+.console div{white-space:pre-wrap; line-height:1.5;}
+.players{display:flex; gap:8px; flex-wrap:wrap; margin-top:10px; font-size:.8rem;}
+.player-chip{background:var(--bg); border:1px solid var(--border); border-radius:14px; padding:4px 10px;}
+footer{text-align:center; padding:30px 20px calc(30px + env(safe-area-inset-bottom,0px)); color:var(--muted); font-size:.85rem; border-top:2px solid var(--border);}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="nav">
+    <div class="logo pixel"><div class="logo-block"></div>BlockHost</div>
+    <nav>
+      <a href="#fitur">Fitur</a>
+      <a href="#harga">Harga</a>
+      <a href="#panel">Panel</a>
+      <button id="themeToggle" title="Ganti tema">🌙</button>
+    </nav>
+  </div>
+</header>
+
+<section class="hero">
+  <div id="floatLayer"></div>
+  <h1 class="pixel">Hosting Minecraft <span>Anti Lag</span>,<br>Nyala 24 Jam</h1>
+  <p>Beli, bayar, dan kelola server Minecraft-mu langsung dari satu panel simpel.</p>
+  <button class="cta-btn" onclick="document.getElementById('harga').scrollIntoView()">Lihat Paket Harga</button>
+  <div class="stats reveal">
+    <div class="stat"><span class="counter" data-target="4800">0</span><span class="label">Server Aktif</span></div>
+    <div class="stat"><span class="counter" data-target="99">0</span><span class="label">% Uptime</span></div>
+    <div class="stat"><span class="counter" data-target="24">0</span><span class="label">Jam Support</span></div>
+  </div>
+</section>
+
+<section id="fitur">
+  <h2 class="pixel reveal">Kenapa BlockHost?</h2>
+  <div class="grid">
+    <div class="card reveal"><div class="icon"></div><h3>Setup Instan</h3><p>Server aktif otomatis kurang dari 5 menit setelah pembayaran.</p></div>
+    <div class="card reveal"><div class="icon" style="background:#7a4a2b;border-color:#5c3620;"></div><h3>Uptime 99.9%</h3><p>Berjalan stabil 24/7 di atas SSD NVMe dengan proteksi DDoS.</p></div>
+    <div class="card reveal"><div class="icon" style="background:#4a90d9;border-color:#2f5c8c;"></div><h3>Panel Sendiri</h3><p>Nyalakan, matikan, dan pantau server langsung dari panel di bawah.</p></div>
+    <div class="card reveal"><div class="icon" style="background:#e0c440;border-color:#a89430;"></div><h3>Support Cepat</h3><p>Tim support siap bantu lewat live chat kapan saja.</p></div>
+  </div>
+</section>
+
+<section id="harga">
+  <h2 class="pixel reveal">Pilih Paketmu</h2>
+  <div class="pricing">
+    <div class="plan reveal" data-plan="Survival" data-ram="2 GB" data-price="25000">
+      <h3>Survival</h3><div class="price">Rp25rb<span style="font-size:.85rem;">/bln</span></div>
+      <ul><li>2 GB RAM</li><li>Cocok 1-5 pemain</li><li>Backup mingguan</li></ul>
+      <button class="plan-btn">Pilih Paket</button>
+    </div>
+    <div class="plan popular reveal" data-plan="Survival Plus" data-ram="6 GB" data-price="60000">
+      <div class="badge">TERPOPULER</div>
+      <h3>Survival Plus</h3><div class="price">Rp60rb<span style="font-size:.85rem;">/bln</span></div>
+      <ul><li>6 GB RAM</li><li>Cocok 5-20 pemain</li><li>Backup harian</li><li>Slot mod/plugin bebas</li></ul>
+      <button class="plan-btn">Pilih Paket</button>
+    </div>
+    <div class="plan reveal" data-plan="Server Komunitas" data-ram="12 GB" data-price="120000">
+      <h3>Server Komunitas</h3><div class="price">Rp120rb<span style="font-size:.85rem;">/bln</span></div>
+      <ul><li>12 GB RAM</li><li>Cocok 20-50+ pemain</li><li>Backup harian + priority support</li></ul>
+      <button class="plan-btn">Pilih Paket</button>
+    </div>
+  </div>
+</section>
+
+<section id="panel">
+  <h2 class="pixel reveal">Panel Server-mu</h2>
+  <div id="serverList"></div>
+</section>
+
+<footer>© 2026 BlockHost. Hosting Minecraft untuk semua petualang.</footer>
+
+<!-- Payment modal -->
+<div class="overlay" id="payOverlay">
+  <div class="modal">
+    <div id="payStep1">
+      <h3 class="pixel" style="font-size:.85rem;">Checkout</h3>
+      <div class="order-summary" id="orderSummary"></div>
+      <label>Nama Server</label>
+      <input type="text" id="serverName" placeholder="Server-ku">
+      <label>Email</label>
+      <input type="email" id="payEmail" placeholder="kamu@email.com">
+      <label>Metode Pembayaran</label>
+      <div class="pay-methods">
+        <label class="active"><input type="radio" name="pm" value="QRIS" checked> QRIS</label>
+        <label><input type="radio" name="pm" value="Transfer Bank"> Transfer Bank</label>
+        <label><input type="radio" name="pm" value="E-Wallet"> E-Wallet</label>
+        <label><input type="radio" name="pm" value="Kartu Kredit"> Kartu Kredit</label>
+      </div>
+      <div class="modal-actions">
+        <button class="ghost-btn" id="cancelPay">Batal</button>
+        <button class="pay-btn" id="submitPay">Bayar Sekarang</button>
+      </div>
+    </div>
+    <div id="payStep2" style="display:none;" class="pay-success">
+      <div class="check">✅</div>
+      <h3>Pembayaran Berhasil!</h3>
+      <p style="color:var(--muted);">Server-mu sedang disiapkan dan sudah muncul di panel.</p>
+      <button class="pay-btn" style="width:100%;" id="closeSuccess">Lihat Panel</button>
+    </div>
+  </div>
+</div>
+
+<script>
+(function(){
+"use strict";
+
+/* Theme toggle */
+var themeBtn=document.getElementById('themeToggle'), root=document.documentElement;
+var saved=null; try{saved=localStorage.getItem('bh-theme');}catch(e){}
+if(saved==='light'||saved==='dark') root.setAttribute('data-theme',saved);
+function isDark(){var t=root.getAttribute('data-theme'); if(t==='dark')return true; if(t==='light')return false; return window.matchMedia('(prefers-color-scheme: dark)').matches;}
+function syncIcon(){themeBtn.textContent=isDark()?'☀️':'🌙';}
+syncIcon();
+themeBtn.addEventListener('click',function(){var n=isDark()?'light':'dark'; root.setAttribute('data-theme',n); try{localStorage.setItem('bh-theme',n);}catch(e){} syncIcon();});
+
+/* Floating blocks */
+var colors=['#6fa83a','#8a5a34','#4a90d9','#e0c440','#c9c9c9'];
+var layer=document.getElementById('floatLayer'), blocks=[];
+var count=window.innerWidth<600?5:9;
+for(var i=0;i<count;i++){
+  var el=document.createElement('div'); el.className='float-block'; el.style.background=colors[i%colors.length];
+  layer.appendChild(el);
+  blocks.push({el:el,x:Math.random()*100,y:Math.random()*100,vx:(Math.random()-0.5)*0.04,vy:(Math.random()-0.5)*0.04,rot:Math.random()*360,vr:(Math.random()-0.5)*0.3});
+}
+var reduceMotion=window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+function animateBlocks(){
+  if(reduceMotion) return;
+  blocks.forEach(function(b){
+    b.x+=b.vx; b.y+=b.vy; b.rot+=b.vr;
+    if(b.x<-5||b.x>105) b.vx*=-1; if(b.y<-5||b.y>105) b.vy*=-1;
+    b.el.style.transform='translate(-50%,-50%) rotate('+b.rot+'deg)';
+    b.el.style.left=b.x+'%'; b.el.style.top=b.y+'%';
+  });
+  requestAnimationFrame(animateBlocks);
+}
+requestAnimationFrame(animateBlocks);
+
+/* Reveal on scroll */
+var revealEls=document.querySelectorAll('.reveal');
+if('IntersectionObserver' in window){
+  var io=new IntersectionObserver(function(entries){
+    entries.forEach(function(entry,idx){
+      if(entry.isIntersecting){ setTimeout(function(){entry.target.classList.add('in');},(idx%4)*80); io.unobserve(entry.target); }
+    });
+  },{threshold:.15});
+  revealEls.forEach(function(el){io.observe(el);});
+} else { revealEls.forEach(function(el){el.classList.add('in');}); }
+
+/* Counters */
+var countersStarted=false;
+function startCounters(){
+  if(countersStarted) return; countersStarted=true;
+  document.querySelectorAll('.counter').forEach(function(c){
+    var target=parseInt(c.getAttribute('data-target'),10)||0, startTime=null, duration=1200;
+    function step(ts){ if(!startTime)startTime=ts; var p=Math.min((ts-startTime)/duration,1); var e=1-Math.pow(1-p,3);
+      c.textContent=Math.round(target*e); if(p<1) requestAnimationFrame(step); else c.textContent=target; }
+    requestAnimationFrame(step);
+  });
+}
+var statsRow=document.querySelector('.stats');
+if(statsRow && 'IntersectionObserver' in window){
+  var sIO=new IntersectionObserver(function(entries){entries.forEach(function(e){if(e.isIntersecting){startCounters(); sIO.disconnect();}});},{threshold:.4});
+  sIO.observe(statsRow);
+} else { startCounters(); }
+
+/* Ripple */
+document.addEventListener('click',function(e){
+  var btn=e.target.closest('.cta-btn,.plan-btn,.pay-btn,.ghost-btn,.small-btn');
+  if(!btn) return;
+  var rect=btn.getBoundingClientRect(); var circle=document.createElement('span'); var size=Math.max(rect.width,rect.height);
+  circle.className='ripple'; circle.style.width=circle.style.height=size+'px';
+  circle.style.left=(e.clientX-rect.left-size/2)+'px'; circle.style.top=(e.clientY-rect.top-size/2)+'px';
+  btn.style.position='relative'; btn.appendChild(circle);
+  setTimeout(function(){circle.remove();},600);
+});
+
+/* Smooth scroll nav */
+document.querySelectorAll('a[href^="#"]').forEach(function(link){
+  link.addEventListener('click',function(e){
+    var t=document.querySelector(link.getAttribute('href'));
+    if(t){ e.preventDefault(); t.scrollIntoView({behavior:'smooth',block:'start'}); }
+  });
+});
+
+/* ---------- API layer: backend asli (Express + SQLite + Midtrans QRIS) ---------- */
+// Kosong = same-origin (backend menyajikan file ini juga). Kalau frontend dihost terpisah
+// dari backend, isi dengan URL backend, misal 'https://blockhost-api.up.railway.app'.
+var API_BASE = '';
+function api(path, opts){
+  return fetch(API_BASE + path, Object.assign({headers:{'Content-Type':'application/json'}}, opts))
+    .then(function(res){ return res.json().then(function(data){ if(!res.ok) throw new Error(data.error||'Gagal'); return data; }); });
+}
+var mockNames=['Steve','Alex','CreeperKiller','Enderman99','DiamondMiner','SkyBlockPro'];
+var mockLogs=['[INFO] {p} bergabung ke server','[INFO] {p} keluar dari server','[INFO] Menyimpan dunia otomatis...','[WARN] Chunk loading sedikit lambat'];
+function fmtRupiah(n){ return 'Rp'+n.toLocaleString('id-ID'); }
+
+/* Email pelanggan disimpan di browser supaya panel tahu server siapa yang ditampilkan */
+function getEmail(){ try{ return localStorage.getItem('bh-email')||''; }catch(e){ return ''; } }
+function setEmail(v){ try{ localStorage.setItem('bh-email', v); }catch(e){} }
+
+/* ---------- Checkout modal (order asli -> QRIS asli -> polling status) ---------- */
+var overlay=document.getElementById('payOverlay'), step1=document.getElementById('payStep1'), step2=document.getElementById('payStep2');
+var pendingPlan=null, pollTimer=null;
+document.querySelectorAll('.plan .plan-btn').forEach(function(btn){
+  btn.addEventListener('click',function(){
+    var plan=btn.closest('.plan');
+    pendingPlan={ name:plan.getAttribute('data-plan'), ram:plan.getAttribute('data-ram'), price:parseInt(plan.getAttribute('data-price'),10) };
+    document.getElementById('orderSummary').innerHTML='<strong>'+pendingPlan.name+'</strong> — '+pendingPlan.ram+' RAM<br>Total: <strong>'+fmtRupiah(pendingPlan.price)+'/bln</strong>';
+    document.getElementById('serverName').value='';
+    document.getElementById('payEmail').value=getEmail();
+    step1.style.display='block'; step2.style.display='none';
+    document.getElementById('qrisBox') && document.getElementById('qrisBox').remove();
+    document.getElementById('submitPay').style.display='inline-block';
+    document.getElementById('submitPay').disabled=false; document.getElementById('submitPay').innerHTML='Buat Kode QRIS';
+    overlay.classList.add('show');
+  });
+});
+document.getElementById('cancelPay').addEventListener('click',function(){ overlay.classList.remove('show'); if(pollTimer) clearInterval(pollTimer); });
+overlay.addEventListener('click',function(e){ if(e.target===overlay){ overlay.classList.remove('show'); if(pollTimer) clearInterval(pollTimer); } });
+document.querySelectorAll('.pay-methods label').forEach(function(lbl){
+  lbl.addEventListener('click',function(){ document.querySelectorAll('.pay-methods label').forEach(function(l){l.classList.remove('active');}); lbl.classList.add('active'); });
+});
+
+document.getElementById('submitPay').addEventListener('click',function(){
+  var btn=this;
+  var name=document.getElementById('serverName').value.trim();
+  var email=document.getElementById('payEmail').value.trim();
+  if(!name){ alert('Isi nama server dulu ya'); return; }
+  if(!email || email.indexOf('@')===-1){ alert('Email belum valid'); return; }
+  setEmail(email);
+  btn.disabled=true; btn.innerHTML='<span class="spinner"></span>Membuat order...';
+
+  api('/api/orders', { method:'POST', body: JSON.stringify({ planName: pendingPlan.name, serverName: name, email: email }) })
+    .then(function(order){
+      btn.innerHTML='<span class="spinner"></span>Menyiapkan QRIS...';
+      return api('/api/payments/qris/' + order.orderId, { method:'POST' }).then(function(charge){
+        return { orderId: order.orderId, charge: charge };
+      });
+    })
+    .then(function(result){
+      btn.style.display='none';
+      var box=document.createElement('div'); box.id='qrisBox'; box.style.textAlign='center';
+      box.innerHTML =
+        (result.charge.qrImageUrl ? '<img src="'+result.charge.qrImageUrl+'" alt="Kode QRIS" style="width:200px;height:200px;margin:10px auto;display:block;border:2px solid var(--border);border-radius:8px;">' : '') +
+        '<p style="color:var(--muted);font-size:.85rem;">Scan pakai aplikasi <strong>DANA</strong> (atau e-wallet QRIS lainnya) untuk membayar.</p>' +
+        '<p style="font-size:.8rem;color:var(--muted);">Menunggu pembayaran<span id="dots">...</span></p>';
+      step1.appendChild(box);
+
+      var dots=0;
+      pollTimer=setInterval(function(){
+        dots=(dots+1)%4; var d=document.getElementById('dots'); if(d) d.textContent='.'.repeat(dots||1);
+        api('/api/orders/' + result.orderId).then(function(order){
+          if(order.status==='paid'){
+            clearInterval(pollTimer);
+            step1.style.display='none'; step2.style.display='block';
+            renderServers();
+          } else if(order.status==='expired' || order.status==='failed'){
+            clearInterval(pollTimer);
+            box.innerHTML='<p style="color:var(--danger);">Pembayaran gagal/kedaluwarsa. Coba lagi ya.</p>';
+          }
+        }).catch(function(){});
+      }, 3000);
+    })
+    .catch(function(err){
+      btn.disabled=false; btn.innerHTML='Buat Kode QRIS';
+      alert('Gagal memproses: ' + err.message);
+    });
+});
+document.getElementById('closeSuccess').addEventListener('click',function(){
+  overlay.classList.remove('show');
+  document.getElementById('panel').scrollIntoView({behavior:'smooth'});
+});
+
+/* ---------- Panel: data server asli dari backend, kontrol nyala/mati tersimpan di DB ---------- */
+var timers={};
+function renderServers(){
+  var email=getEmail();
+  var wrap=document.getElementById('serverList');
+  if(!email){
+    wrap.innerHTML='<div class="empty">Belum ada server. Masukkan email yang kamu pakai saat checkout untuk lihat server-mu:<br><br>'+
+      '<input id="emailLookup" type="email" placeholder="email@kamu.com" style="max-width:260px;padding:8px;border-radius:6px;border:2px solid var(--border);"> '+
+      '<button class="small-btn primary" id="lookupBtn">Tampilkan</button></div>';
+    document.getElementById('lookupBtn').addEventListener('click',function(){
+      var v=document.getElementById('emailLookup').value.trim();
+      if(v && v.indexOf('@')>-1){ setEmail(v); renderServers(); }
+    });
+    return;
+  }
+  api('/api/servers?email=' + encodeURIComponent(email)).then(function(list){
+    if(list.length===0){
+      wrap.innerHTML='<div class="empty">Belum ada server untuk <strong>'+email+'</strong>. Pilih paket di atas untuk mulai. <button class="small-btn" id="switchEmail">Ganti email</button></div>';
+      document.getElementById('switchEmail').addEventListener('click',function(){ setEmail(''); renderServers(); });
+      return;
+    }
+    wrap.innerHTML='<div style="text-align:right;margin-bottom:10px;"><button class="small-btn" id="switchEmail2">Ganti email (saat ini: '+email+')</button></div>';
+    document.getElementById('switchEmail2').addEventListener('click',function(){ setEmail(''); renderServers(); });
+
+    list.forEach(function(server){
+      var card=document.createElement('div'); card.className='server-card'; card.id=server.id;
+      var cpu=Math.floor(Math.random()*40)+20, ram=Math.floor(Math.random()*50)+25;
+      card.innerHTML=
+        '<div class="server-head"><h3>🧱 '+server.name+'</h3><span class="status-pill '+server.status+'">'+(server.status==='online'?'● Online':'○ Offline')+'</span></div>'+
+        '<div style="color:var(--muted);font-size:.85rem;margin-top:4px;">Paket '+server.plan_name+' · '+server.ram+' RAM</div>'+
+        '<div class="server-actions">'+
+          '<button class="small-btn primary" data-action="toggle">'+(server.status==='online'?'Matikan':'Nyalakan')+'</button>'+
+          '<button class="small-btn danger" data-action="delete">Hapus</button>'+
+        '</div>'+
+        '<div class="meter-row">RAM <span class="ramLabel">'+ram+'%</span></div><div class="meter"><div class="meter-fill ramFill" style="width:'+ram+'%;"></div></div>'+
+        '<div class="meter-row">CPU <span class="cpuLabel">'+cpu+'%</span></div><div class="meter"><div class="meter-fill cpuFill" style="width:'+cpu+'%;background:#4a90d9;"></div></div>'+
+        '<div class="players"></div>'+
+        '<div class="console"><div>[INFO] Terhubung ke server '+server.id+' (data dari backend)</div></div>';
+      wrap.appendChild(card);
+
+      card.querySelector('[data-action="toggle"]').addEventListener('click',function(){
+        api('/api/servers/' + server.id + '/toggle', { method:'POST' }).then(function(){ renderServers(); });
+      });
+      card.querySelector('[data-action="delete"]').addEventListener('click',function(){
+        if(!confirm('Hapus server "'+server.name+'"?')) return;
+        api('/api/servers/' + server.id, { method:'DELETE' }).then(function(){ renderServers(); });
+      });
+
+      if(server.status==='online') startLiveUpdates(card, server);
+    });
+  }).catch(function(err){
+    wrap.innerHTML='<div class="empty">Gagal memuat server: '+err.message+'. Pastikan backend sedang berjalan.</div>';
+  });
+}
+function pushLog(card,text){
+  var box=card.querySelector('.console');
+  var line=document.createElement('div'); line.textContent=text; box.appendChild(line);
+  box.scrollTop=box.scrollHeight;
+  while(box.children.length>30) box.removeChild(box.firstChild);
+}
+function startLiveUpdates(card, server){
+  if(timers[server.id]) clearInterval(timers[server.id]);
+  var playersEl=card.querySelector('.players');
+  timers[server.id]=setInterval(function(){
+    if(!document.body.contains(card)){ clearInterval(timers[server.id]); return; }
+    var ram=Math.floor(Math.random()*50)+25, cpu=Math.floor(Math.random()*40)+20;
+    card.querySelector('.ramFill').style.width=ram+'%'; card.querySelector('.ramLabel').textContent=ram+'%';
+    card.querySelector('.cpuFill').style.width=cpu+'%'; card.querySelector('.cpuLabel').textContent=cpu+'%';
+    var name=mockNames[Math.floor(Math.random()*mockNames.length)];
+    var log=mockLogs[Math.floor(Math.random()*mockLogs.length)].replace('{p}',name);
+    pushLog(card, log);
+    if(log.indexOf('bergabung')>-1){
+      if(![].some.call(playersEl.children,function(c){return c.textContent===name;})){
+        var chip=document.createElement('span'); chip.className='player-chip'; chip.textContent=name; playersEl.appendChild(chip);
+      }
+    } else if(log.indexOf('keluar')>-1){
+      [].forEach.call(playersEl.children,function(c){ if(c.textContent===name) c.remove(); });
+    }
+  }, 2600);
+}
+
+renderServers();
+})();
+</script>
+</body>
+</html>
